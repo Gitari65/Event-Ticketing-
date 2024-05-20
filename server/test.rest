@@ -1,0 +1,37 @@
+
+
+# POST http://127.0.0.1:8000/event/create HTTP/1.1
+# content-type: application/json
+
+# {
+#     "name": "Shusha nyavu",
+#     "venue": "nairobi house",
+#     "location":"cbd"
+# }
+
+
+
+
+
+
+
+
+
+
+
+
+POST http://127.0.0.1:8000/register HTTP/1.1
+content-type: application/json
+
+{
+    "name": "john",
+    "email": "example1@mail.com",
+    "password":"1234"
+}
+
+# GET  http://127.0.0.1:8000 HTTP/1.1
+# content-type: application/json
+
+# {
+  
+# }

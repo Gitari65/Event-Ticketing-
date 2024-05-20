@@ -1,22 +1,36 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+namespace App\Http\Controllers;
+ 
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
     //
-    public function login(Request $request ){
-        $input =$request->validate([
-            'email'=>['email','required'],
-            'password'=>'required'
+     /**
+     * Handle an authentication attempt.
+     */
+    public function authenticate(Request $request): RedirectResponse
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
         ]);
-        if(auth()->attempt(['email'=>$input['email'],'password'=>$input['password']])){
+ 
+        if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect('/');
+ 
+            return response()->json(['message' => ' success'], 200);
         }
-        return redirect('/login');
-
+ 
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
     }
 }
