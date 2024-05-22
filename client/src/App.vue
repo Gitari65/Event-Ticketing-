@@ -4,6 +4,7 @@
 </template>
 
 <script>
+import '../src/assets/styles/styles.css'
 
 
 export default {
