@@ -4,6 +4,7 @@
       <input v-model="email" placeholder="Email" />
       <input v-model="password" type="password" placeholder="Password" />
       <button type="submit">Login</button>
+      <p v-if="errorMessage">{{ errorMessage }}</p>
     </form>
   </div>
 </template>
@@ -15,33 +16,33 @@ export default {
   data() {
     return {
       email: '',
-      password: ''
+      password: '',
+      errorMessage: ''
     };
   },
   methods: {
     async handleLogin() {
-    await axios.get('http://127.0.0.1:8000/sanctum/csrf-cookie').then(response=> {
-       console.log('csrf data:',response.data) 
-        axios.post('http://127.0.0.1:8000/login', {
+      try {
+        const response = await axios.post('http://127.0.0.1:8000/login', {
           email: this.email,
           password: this.password
-        },{
-         headers: {
-          Accept:"application/json",
-            'X-XSRF-TOKEN': response.data.csrfToken,
-             'X-CSRF-TOKEN': response.data.csrfToken,
-          },
-          withCredentials: true // Ensure cookies are included in the request,
-      
-        })
-        .then(response => {
-          console.log('Logged in successfully:', response.data);
-        })
-        .catch(error => {
-          console.error('Login failed:', error);
+        }, {
+          withCredentials: true // Ensure cookies are included in the request
         });
-      });
+
+        console.log('Logged in successfully:', response.data);
+      } catch (error) {
+        if (error.response) {
+          this.errorMessage = error.response.data.error || 'Login failed';
+        } else {
+          this.errorMessage = 'An error occurred';
+        }
+        console.error('Login failed:', error);
+      }
     }
   }
 };
 </script>
+<style >
+
+</style>
