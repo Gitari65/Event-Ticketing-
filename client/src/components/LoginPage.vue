@@ -1,11 +1,21 @@
 <template>
-  <div>
-    <form @submit.prevent="handleLogin">
-      <input v-model="email" placeholder="Email" />
-      <input v-model="password" type="password" placeholder="Password" />
-      <button type="submit">Login</button>
-      <p v-if="errorMessage">{{ errorMessage }}</p>
-    </form>
+  <div class="login container-fluid">
+    <div class="row">
+        <div class=" first-col col-sm-0 col-md-0 col-lg-6">
+
+        </div>
+        <div class=" col-sm-12 col-md-5 col-lg-5">
+            <form @submit.prevent="handleLogin">
+            <input v-model="email" placeholder="Email" />
+            <input v-model="password" type="password" placeholder="Password" />
+            <button type="submit">Login</button>
+            <p v-if="errorMessage">{{ errorMessage }}</p>
+          </form>
+        </div>
+    </div>
+    
+
+   
   </div>
 </template>
 
