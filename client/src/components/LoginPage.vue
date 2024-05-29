@@ -1,14 +1,23 @@
 <template>
   <div class="login container-fluid">
+    <div class="row  align-items-center">
+      <div v-if="successMessage" class="align-items-center align-text-center"><SuccessPage/></div>
+      <div v-if="errorMessage"><ErrorPage/></div>
+      <div v-if="loading"> <SpinnerPage /></div>
+    </div>
     <div class="row">
-        <div class=" first-col col-sm-0 col-md-0 col-lg-6">
-
+        <div class=" first-col col-sm-1 col-md-6 col-lg-8">
+<img src="../assets/images/backphoto.png" alt="logo"/>
         </div>
-        <div class=" col-sm-12 col-md-5 col-lg-5">
+        <div class=" col-sm-12 col-md-6 col-lg-4">
+         
             <form @submit.prevent="handleLogin">
+              <h1>Sign in</h1><br>
             <input v-model="email" placeholder="Email" />
             <input v-model="password" type="password" placeholder="Password" />
             <button type="submit">Login</button>
+            <p>Forgot password?</p>
+            <p>Dont have an account Signup?</p>
             <p v-if="errorMessage">{{ errorMessage }}</p>
           </form>
         </div>
@@ -21,26 +30,56 @@
 
 <script>
 import axios from 'axios';
+import SuccessPage from '../assets/constants/SuccessPage.vue'
+import ErrorPage from '../assets/constants/ErrorPage.vue'
+import SpinnerPage from '../assets/constants/SpinnerPage.vue'
+import {useRouter} from 'vue-router'
 
 export default {
+  setup(){
+    const router=useRouter();
+    return {
+      router
+    }
+  },
+  components:{
+    SuccessPage,
+    ErrorPage,
+    SpinnerPage
+  },
   data() {
     return {
       email: '',
       password: '',
-      errorMessage: ''
+      errorMessage: '',
+      successMessage: '',
+      loading:false
     };
   },
   methods: {
     async handleLogin() {
+      this.loading = true;
+      this.errorMessage = '';
+      this.successMessage = '';
       try {
         const response = await axios.post('http://127.0.0.1:8000/login', {
           email: this.email,
-          password: this.password
+          password: this.password,
+          token_name:'MyAppToken'
         }, {
           withCredentials: true // Ensure cookies are included in the request
         });
 
+       
+
         console.log('Logged in successfully:', response.data);
+        this.successMessage="Logged in Succefully";
+        this.loading=false;
+        if (response.data.token){
+           // Redirect to addevent route
+          this.router.push({ name: 'addevent' });
+          localStorage.setItem('token',response.data.token);
+        }
       } catch (error) {
         if (error.response) {
           this.errorMessage = error.response.data.error || 'Login failed';
@@ -48,6 +87,8 @@ export default {
           this.errorMessage = 'An error occurred';
         }
         console.error('Login failed:', error);
+      } finally {
+        this.loading = false;
       }
     }
   }

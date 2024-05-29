@@ -2,7 +2,7 @@
     <div class="main-container d-flex">
       <SideBar />
       <div class="content-container">
-        <NavBar />
+        <!-- <NavBar /> -->
         <div class="content">
           <router-view />
         </div>
@@ -12,12 +12,12 @@
   
   <script>
   import SideBar from './SideBar.vue';
-  import NavBar from './NavBar.vue';
+
   
   export default {
     components: {
       SideBar,
-      NavBar,
+     
     },
   };
   </script>
