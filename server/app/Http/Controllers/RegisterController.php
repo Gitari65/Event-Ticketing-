@@ -15,7 +15,7 @@ class RegisterController extends Controller
         $inputUSer=$request->validate([
             'name'=>['required','min:3','max:10'],
             'email'=>['required','email',Rule::unique('users','email')],
-            'password'=>['required','min:8','max:200']
+            'password'=>['required','min:6','max:200']
         ]);
         $input['password']=Hash::make( $inputUSer['password']);
 
