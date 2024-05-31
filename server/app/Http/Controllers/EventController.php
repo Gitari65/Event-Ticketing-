@@ -22,19 +22,21 @@ class EventController extends Controller
         $data=$request->validate([
             'name'=>'required',
             'venue'=>'required',
-            'location'=>'required'
+            'location'=>'required',
+            'user_id'=>'required'
 
         ]);
-        $data['user_id']=auth()->id();
+       
 
         $newEvent=Event::create($data);
         return response()->json(['status'=>true,
-        'message'=>'event created successfully'
-    ]);
+        'message'=>'event created successfully',
+        'eventId'=>$newEvent->id
+    ],201);
 
     }
     public function  getEvents(){
         $events=Event::all();
-        return view('events',['events'=>$events]);
+        return response()->json(['events'=>$events],200);
     }
 }
