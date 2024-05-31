@@ -10,14 +10,25 @@ class TicketController extends Controller
     //
     public function storeTickets(Request $request){
         $ticketData=$request->validate([
-            'type'=>['required'],
-            'price'=>['required']
+            'eventId'=>['required','numeric'],
+            'tickets'=>['required','array'],
+            'tickets.*.type'=>['required'],
+            'tickets.*.price'=>['required'],
         ]);
-        $ticket = Ticket::create($ticketData);
+       
+        foreach($ticketData['tickets'] as $inputData){
+             Ticket::create([
+               
+                'event_id'=> $ticketData['eventId'],
+                'type'=> $inputData['type'],
+                'price'=> $inputData['price'], 
+             ]
+                        );
+        }
 
         return response()->json([
             'message' => 'Ticket created successfully',
-            'ticket' => $ticket
+            
         ], 201);
     }
 }
