@@ -1,13 +1,20 @@
 <template>
   <div class="container">
+    <SuccessPage v-if="successMessage" :message="successMessage" />
+    <ErrorPage v-if="errorMessage" :message="errorMessage" />
+    <div v-if="loading" class="overlay">
+      <SpinnerPage />
+    </div>
+    
     <!-- Progress bar -->
-    <div class="progress_container">
+    <div class="progress-container">
       <div class="progress" :style="{ width: progressPercentage + '%' }"></div>
       <div class="circle" :class="{ active: step >= 1 }">1</div>
       <div class="circle" :class="{ active: step >= 2 }">2</div>
       <div class="circle" :class="{ active: step >= 3 }">3</div>
     </div>
 
+    <!-- Form steps -->
     <!-- Step 1: Event Details -->
     <form v-if="step === 1" @submit.prevent="nextStep">
       <h2>Create Event</h2>
@@ -30,7 +37,6 @@
     <form v-if="step === 2" @submit.prevent="nextStep">
       <h2>Ticket Details</h2>
       <div v-for="(ticket, index) in tickets" :key="index" class="form-group">
-       
         <label>Type:</label>
         <input type="text" v-model="ticket.type" required>
         <label>Price:</label>
@@ -50,7 +56,7 @@
       <p>Location: {{ event.location }}</p>
       <h3>Tickets</h3>
       <div v-for="(ticket, index) in tickets" :key="index">
-        <p>Ticket {{ index + 1 }}:   {{ ticket.type }} - ${{ ticket.price }}</p>
+        <p>Ticket {{ index + 1 }}: {{ ticket.type }} - ${{ ticket.price }}</p>
       </div>
       <button type="submit">Submit</button>
     </form>
@@ -59,22 +65,38 @@
 
 <script>
 import axios from 'axios';
+import SuccessPage from '../assets/constants/SuccessPage.vue';
+import ErrorPage from '../assets/constants/ErrorPage.vue';
+import SpinnerPage from '../assets/constants/SpinnerPage.vue';
 
 export default {
   data() {
     return {
       step: 1,
+      eventId: null,
       event: {
         name: '',
         venue: '',
-        location: ''
+        location: '',
+        successMessage: 'Event created successfully!',
+      errorMessage: 'Error creating event. Please try again.',
+        user_id: ''
       },
-      tickets: [
-        { type: '', price: 0 }
-      ]
+      tickets: [{ type: '', price: 0 }],
+      loading: false,
+      errorMessage: '',
+      successMessage: ''
     };
   },
+  components: {
+    SuccessPage,
+    ErrorPage,
+    SpinnerPage
+  },
   computed: {
+    user() {
+      return this.$store.state.user;
+    },
     progressPercentage() {
       return (this.step / 3) * 100;
     }
@@ -86,34 +108,63 @@ export default {
       }
     },
     addTicket() {
-      this.tickets.push({  type: '', price: 0 });
+      this.tickets.push({ type: '', price: 0 });
     },
     removeTicket(index) {
       this.tickets.splice(index, 1);
     },
-    submitForm() {
-      axios.post('/api/events', {
-        event: this.event,
-        tickets: this.tickets
-      })
-      .then(response => {
-        console.log('Event and tickets created:', response.data);
-        // Redirect or perform other actions upon successful creation
-      })
-      .catch(error => {
+    async submitForm() {
+      this.loading = true;
+      this.errorMessage = '';
+      this.successMessage = '';
+      
+      this.event.user_id = this.user.id;
+
+      if (!this.event.user_id) {
+        this.loading = false;
+        this.errorMessage = 'User not logged in';
+        return;
+      }
+
+      try {
+        const eventResponse = await axios.post('http://127.0.0.1:8000/event/create', this.event);
+
+        if (!eventResponse.data || !eventResponse.data.eventId) {
+          throw new Error('Invalid event response structure');
+        }
+
+        this.eventId = eventResponse.data.eventId;
+
+        await axios.post('http://127.0.0.1:8000/ticket/create', {
+          tickets: this.tickets,
+          eventId: this.eventId
+        });
+
+        this.loading = false;
+        this.successMessage = 'Event and tickets created successfully!';
+      } catch (error) {
+        this.loading = false;
+        this.errorMessage = 'Error creating event and tickets';
         console.error('Error creating event and tickets:', error);
-      });
+      }
     }
   }
 };
 </script>
-
 <style scoped>
-/* Add your styles here */
-.progress_container {
+.container {
+  position: relative;
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+}
+
+.progress-container {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
+  position: relative;
 }
 
 .progress {
@@ -140,5 +191,39 @@ export default {
 .circle.active {
   background: #3498db;
   color: #fff;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.align-items-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.align-text-center {
+  text-align: center;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.overlay > * {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
 }
 </style>
