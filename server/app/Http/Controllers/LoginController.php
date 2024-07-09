@@ -22,7 +22,11 @@ class LoginController extends Controller
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
             $token =$user->createToken($request->token_name)->plainTextToken;
-            return response()->json(['message' => 'Login successful', 'token' => $token], 200);
+            return response()->json(['message' => 'Login successful', 
+            'token' => $token,
+            'userId'=>$user->id
+        
+        ], 200);
         }
 
         return response()->json(['error' => 'The provided credentials do not match our records.'], 401);
