@@ -76,9 +76,17 @@ export default {
         this.successMessage="Logged in Succefully";
         this.loading=false;
         if (response.data.token){
+
+        const userId = response.data.userId;
            // Redirect to addevent route
           this.router.push({ name: 'addevent' });
+          console.log("userd:",userId);
+
           localStorage.setItem('token',response.data.token);
+          this.$store.dispatch('setUser', { id: userId });
+
+// Store the token in localStorage
+localStorage.setItem('authToken', response.data.token);
         }
       } catch (error) {
         if (error.response) {
