@@ -1,30 +1,26 @@
 <template>
   <div class="login container-fluid">
-    <div class="row  align-items-center">
+    <div class="row align-items-center">
       <div v-if="successMessage" class="align-items-center align-text-center"><SuccessPage/></div>
       <div v-if="errorMessage"><ErrorPage/></div>
       <div v-if="loading"> <SpinnerPage /></div>
     </div>
     <div class="row">
-        <div class=" first-col col-sm-1 col-md-6 col-lg-8">
-<img src="../assets/images/backphoto.png" alt="logo"/>
-        </div>
-        <div class=" col-sm-12 col-md-6 col-lg-4">
-         
-            <form @submit.prevent="handleLogin">
-              <h1>Sign in</h1><br>
-            <input v-model="email" placeholder="Email" />
-            <input v-model="password" type="password" placeholder="Password" />
-            <button type="submit">Login</button>
-            <p>Forgot password?</p>
-            <p>Dont have an account Signup?</p>
-            <p v-if="errorMessage">{{ errorMessage }}</p>
-          </form>
-        </div>
+      <div class="first-col col-sm-1 col-md-6 col-lg-8">
+        <img src="../assets/images/backphoto.png" alt="logo"/>
+      </div>
+      <div class="col-sm-12 col-md-6 col-lg-4">
+        <form @submit.prevent="handleLogin">
+          <h1>Sign in</h1><br>
+          <input v-model="email" placeholder="Email" />
+          <input v-model="password" type="password" placeholder="Password" />
+          <button type="submit">Login</button>
+          <p>Forgot password?</p>
+          <p>Don't have an account? <router-link to="/register">Register</router-link></p>
+          <p v-if="errorMessage">{{ errorMessage }}</p>
+        </form>
+      </div>
     </div>
-    
-
-   
   </div>
 </template>
 
@@ -33,19 +29,20 @@ import axios from 'axios';
 import SuccessPage from '../assets/constants/SuccessPage.vue'
 import ErrorPage from '../assets/constants/ErrorPage.vue'
 import SpinnerPage from '../assets/constants/SpinnerPage.vue'
-import {useRouter} from 'vue-router'
+import { useRouter } from 'vue-router';
 
 export default {
-  setup(){
-    const router=useRouter();
-    return {
-      router
-    }
-  },
-  components:{
+  components: {
     SuccessPage,
     ErrorPage,
     SpinnerPage
+  },
+  setup() {
+    const router = useRouter();
+
+    return {
+      router,
+    };
   },
   data() {
     return {
@@ -53,7 +50,7 @@ export default {
       password: '',
       errorMessage: '',
       successMessage: '',
-      loading:false
+      loading: false
     };
   },
   methods: {
@@ -61,32 +58,39 @@ export default {
       this.loading = true;
       this.errorMessage = '';
       this.successMessage = '';
+
       try {
         const response = await axios.post('http://127.0.0.1:8000/login', {
           email: this.email,
           password: this.password,
-          token_name:'MyAppToken'
+          token_name: 'MyAppToken'
         }, {
           withCredentials: true // Ensure cookies are included in the request
         });
 
-       
-
         console.log('Logged in successfully:', response.data);
-        this.successMessage="Logged in Succefully";
-        this.loading=false;
-        if (response.data.token){
 
-        const userId = response.data.userId;
-           // Redirect to addevent route
-          this.router.push({ name: 'addevent' });
-          console.log("userd:",userId);
+        this.successMessage = "Logged in Successfully";
+        this.loading = false;
 
-          localStorage.setItem('token',response.data.token);
-          this.$store.dispatch('setUser', { id: userId });
+        if (response.data.token) {
+          const userId = response.data.userId;
+          const userEmail = response.data.email;
+          const userName = response.data.name;
 
-// Store the token in localStorage
-localStorage.setItem('authToken', response.data.token);
+          // Store the token in localStorage
+          localStorage.setItem('authToken', response.data.token);
+
+          // Store user data separately
+          localStorage.setItem('userId', userId);
+          localStorage.setItem('userName', userName);
+          localStorage.setItem('userEmail', userEmail);
+
+          // Store user in Vuex state
+          this.$store.dispatch('setUser', { id: userId, email: userEmail, name: userName });
+
+          // Redirect to dashboard route
+          this.router.push({ name: 'dashboard' });
         }
       } catch (error) {
         if (error.response) {
@@ -95,13 +99,9 @@ localStorage.setItem('authToken', response.data.token);
           this.errorMessage = 'An error occurred';
         }
         console.error('Login failed:', error);
-      } finally {
         this.loading = false;
       }
     }
   }
 };
 </script>
-<style >
-
-</style>
