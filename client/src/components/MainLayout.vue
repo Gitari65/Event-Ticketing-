@@ -3,21 +3,22 @@
       <SideBar />
       <div class="content-container">
         <!-- <NavBar /> -->
-        <div class="content">
+       
           <router-view />
         </div>
       </div>
-    </div>
+
   </template>
   
   <script>
   import SideBar from './SideBar.vue';
 
+
   
   export default {
     components: {
       SideBar,
-     
+  
     },
   };
   </script>
