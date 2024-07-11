@@ -18,48 +18,61 @@
     <!-- Step 1: Event Details -->
     <form v-if="step === 1" @submit.prevent="nextStep">
       <h2>Create Event</h2>
-      <div class="form-group">
-        <label for="name">Event Name:</label>
-        <input type="text" id="name" v-model="event.name" required>
+      <div class="mb-3">
+        <label for="name" class="form-label">Event Name:</label>
+        <input type="text" id="name" v-model="event.name" class="form-control" required>
       </div>
-      <div class="form-group">
-        <label for="venue">Venue:</label>
-        <input type="text" id="venue" v-model="event.venue" required>
+      <div class="mb-3">
+        <label for="venue" class="form-label">Venue:</label>
+        <input type="text" id="venue" v-model="event.venue" class="form-control" required>
       </div>
-      <div class="form-group">
-        <label for="location">Location:</label>
-        <input type="text" id="location" v-model="event.location" required>
+      <div class="mb-3">
+        <label for="location" class="form-label">Location:</label>
+        <input type="text" id="location" v-model="event.location" class="form-control" required>
       </div>
-      <button type="submit">Next</button>
+      <button type="submit" class="btn btn-primary">Next</button>
     </form>
 
     <!-- Step 2: Ticket Details -->
     <form v-if="step === 2" @submit.prevent="nextStep">
       <h2>Ticket Details</h2>
-      <div v-for="(ticket, index) in tickets" :key="index" class="form-group">
-        <label>Type:</label>
-        <input type="text" v-model="ticket.type" required>
-        <label>Price:</label>
-        <input type="number" v-model="ticket.price" required>
-        <button @click.prevent="removeTicket(index)">Remove Ticket</button>
+      <div v-for="(ticket, index) in tickets" :key="index" class="mb-3 p-3 border rounded">
+        <div class="mb-3">
+          <label class="form-label">Type:</label>
+          <input type="text" v-model="ticket.type" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Price:</label>
+          <input type="number" v-model="ticket.price" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">No. of Tickets:</label>
+          <input type="number" v-model="ticket.amount" class="form-control" required>
+        </div>
+        <button @click.prevent="removeTicket(index)" class="btn btn-danger btn-sm">Remove Ticket</button>
       </div>
-      <button @click.prevent="addTicket">Add Ticket</button>
-      <button type="submit">Next</button>
+      <button @click.prevent="addTicket" class="btn btn-secondary btn-sm mb-3">Add Ticket</button>
+      <button type="submit" class="btn btn-primary">Next</button>
     </form>
 
     <!-- Step 3: Review & Submit -->
-    <form v-if="step === 3" @submit.prevent="submitForm">
+    <div v-if="step === 3">
       <h2>Review & Submit</h2>
-      <h3>Event Details</h3>
-      <p>Name: {{ event.name }}</p>
-      <p>Venue: {{ event.venue }}</p>
-      <p>Location: {{ event.location }}</p>
-      <h3>Tickets</h3>
-      <div v-for="(ticket, index) in tickets" :key="index">
-        <p>Ticket {{ index + 1 }}: {{ ticket.type }} - ${{ ticket.price }}</p>
+      <div class="mb-3 p-3 border rounded">
+        <h3>Event Details</h3>
+        <p><strong>Name:</strong> {{ event.name }}</p>
+        <p><strong>Venue:</strong> {{ event.venue }}</p>
+        <p><strong>Location:</strong> {{ event.location }}</p>
       </div>
-      <button type="submit">Submit</button>
-    </form>
+      <div class="mb-3 p-3 border rounded">
+        <h3>Tickets</h3>
+        <div v-for="(ticket, index) in tickets" :key="index">
+          <p><strong>Ticket {{ index + 1 }}:</strong> {{ ticket.type }} - ${{ ticket.price }} ({{ ticket.amount }} available)</p>
+        </div>
+      </div>
+      <button @click.prevent="editForm" class="btn btn-warning me-2">Edit</button>
+      <button @click.prevent="submitForm" class="btn btn-success">Submit</button>
+    </div>
   </div>
 </template>
 
@@ -78,11 +91,9 @@ export default {
         name: '',
         venue: '',
         location: '',
-        successMessage: 'Event created successfully!',
-      errorMessage: 'Error creating event. Please try again.',
         user_id: ''
       },
-      tickets: [{ type: '', price: 0 }],
+      tickets: [{ type: '', price: 0, amount: 0 }],
       loading: false,
       errorMessage: '',
       successMessage: ''
@@ -108,55 +119,74 @@ export default {
       }
     },
     addTicket() {
-      this.tickets.push({ type: '', price: 0 });
+      this.tickets.push({ type: '', price: 0, amount: 0 });
     },
     removeTicket(index) {
       this.tickets.splice(index, 1);
     },
+    editForm() {
+      // Go back to the appropriate step for editing
+      if (this.step === 3) {
+        this.step = 1; // Go back to Step 1 for editing
+      }
+    },
     async submitForm() {
-      this.loading = true;
-      this.errorMessage = '';
-      this.successMessage = '';
-      
-      this.event.user_id = this.user.id;
+  this.loading = true;
+  this.errorMessage = '';
+  this.successMessage = '';
 
-      if (!this.event.user_id) {
+  try {
+    // Check if the user is logged in
+    if (!this.user || !this.user.id) {
         this.loading = false;
-        this.errorMessage = 'User not logged in';
-        return;
-      }
-
-      try {
-        const eventResponse = await axios.post('http://127.0.0.1:8000/event/create', this.event);
-
-        if (!eventResponse.data || !eventResponse.data.eventId) {
-          throw new Error('Invalid event response structure');
-        }
-
-        this.eventId = eventResponse.data.eventId;
-
-        await axios.post('http://127.0.0.1:8000/ticket/create', {
-          tickets: this.tickets,
-          eventId: this.eventId
-        });
-
-        this.loading = false;
-        this.successMessage = 'Event and tickets created successfully!';
-      } catch (error) {
-        this.loading = false;
-        this.errorMessage = 'Error creating event and tickets';
-        console.error('Error creating event and tickets:', error);
-      }
+      this.errorMessage = 'User not logged in';
+      throw new Error('User not logged in');
+    
     }
+
+    // Assign the user ID to the event object
+    this.event.user_id = this.user.id;
+
+    // Send event creation request
+    const eventResponse = await axios.post('http://127.0.0.1:8000/event/create', this.event);
+
+    if (!eventResponse.data || !eventResponse.data.eventId) {
+      this.loading = false;
+      this.errorMessage('error while trying to save event')
+      throw new Error('Invalid event response structure');
+      
+    }
+
+    this.eventId = eventResponse.data.eventId;
+
+    // Send ticket creation request
+    await axios.post('http://127.0.0.1:8000/ticket/create', {
+      tickets: this.tickets,
+      eventId: this.eventId
+    });
+
+    this.loading = false;
+    this.successMessage = 'Event and tickets created successfully!';
+  } catch (error) {
+    this.loading = false;
+    this.errorMessage = error.message || 'Error creating event and tickets';
+    console.error('Error creating event and tickets:', error);
+  }
+}
+
   }
 };
 </script>
+
 <style scoped>
 .container {
   position: relative;
   max-width: 800px;
   margin: auto;
   padding: 20px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .progress-container {
@@ -173,7 +203,7 @@ export default {
   left: 0;
   height: 5px;
   background: #3498db;
-  z-index: -1;
+  z-index: 9;
   transition: width 0.3s;
 }
 
@@ -191,20 +221,7 @@ export default {
 .circle.active {
   background: #3498db;
   color: #fff;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.align-items-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.align-text-center {
-  text-align: center;
+  z-index: 10;
 }
 
 .overlay {
