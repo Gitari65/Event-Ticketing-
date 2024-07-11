@@ -24,12 +24,23 @@ class LoginController extends Controller
             $token =$user->createToken($request->token_name)->plainTextToken;
             return response()->json(['message' => 'Login successful', 
             'token' => $token,
-            'userId'=>$user->id
+            'userId'=>$user->id,
+            'name'=>$user->name,
+            'email'=>$user->email
         
         ], 200);
         }
 
         return response()->json(['error' => 'The provided credentials do not match our records.'], 401);
+    }
+    public function logout(Request $request): JsonResponse
+    {
+        Auth::logout();
+ 
+        $request->session()->invalidate();
+     
+        $request->session()->regenerateToken();
+        return response()->json(['message' => 'Logged out'], 200);
     }
 }
 
