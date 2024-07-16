@@ -87,7 +87,7 @@ export default {
           localStorage.setItem('userEmail', userEmail);
 
           // Store user in Vuex state
-          this.$store.dispatch('setUser', { id: userId, email: userEmail, name: userName });
+          this.$store.dispatch('setUser', { userId:userId,id: userId, email: userEmail, name: userName });
 
           // Redirect to dashboard route
           this.router.push({ name: 'dashboard' });
