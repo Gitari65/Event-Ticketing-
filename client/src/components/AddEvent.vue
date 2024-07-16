@@ -30,6 +30,14 @@
         <label for="location" class="form-label">Location:</label>
         <input type="text" id="location" v-model="event.location" class="form-control" required>
       </div>
+      <div class="form-group">
+        <label for="date">Date</label>
+        <input v-model="date" type="date" class="form-control" id="date" required>
+      </div>
+      <div class="form-group">
+        <label for="time">Time</label>
+        <input v-model="time" type="time" class="form-control" id="time" required>
+      </div>
       <button type="submit" class="btn btn-primary">Next</button>
     </form>
 
@@ -91,7 +99,9 @@ export default {
         name: '',
         venue: '',
         location: '',
-        user_id: ''
+        user_id: '',
+        date: '',
+        time: ''
       },
       tickets: [{ type: '', price: 0, amount: 0 }],
       loading: false,
