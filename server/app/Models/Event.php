@@ -13,7 +13,9 @@ class Event extends Model
         'name',
         'venue',
         'location',
-        'user_id'
+        'user_id',
+        'date',
+        'time'
     ];
     public function tickets(){
         return $this->hasMany(Ticket::class);
