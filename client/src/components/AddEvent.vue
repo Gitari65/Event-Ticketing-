@@ -32,11 +32,11 @@
       </div>
       <div class="form-group">
         <label for="date">Date</label>
-        <input v-model="date" type="date" class="form-control" id="date" required>
+        <input v-model="event.date" type="date" class="form-control" id="date" required>
       </div>
       <div class="form-group">
         <label for="time">Time</label>
-        <input v-model="time" type="time" class="form-control" id="time" required>
+        <input v-model="event.time" type="time" class="form-control" id="time" required>
       </div>
       <button type="submit" class="btn btn-primary">Next</button>
     </form>
