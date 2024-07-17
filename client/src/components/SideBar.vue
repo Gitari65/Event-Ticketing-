@@ -23,18 +23,21 @@
       </div>
       <ul class="list-unstyled px-2">
         <li :class="{ active: activeTab === 'dashboard' }" @click="activateTab('dashboard')">
-          <a href="#" class="text-decoration-none px-3 py-2 d-block">
-            <router-link class="routerlink" to="/dashboard">
+           <router-link class="routerlink" to="/dashboard">
+             <a href="#" class="text-decoration-none px-3 py-2 d-block">
+          
              <font-awesome-icon :icon="['fas', 'home']" /> <span v-if="!isSidebarActive">Dashboard</span>
-            </router-link>
-          </a>
+            </a>
+           </router-link>
+         
         </li>
         <li :class="{ active: activeTab === 'events' }" @click="activateTab('events')">
-          <a href="#" class="text-decoration-none px-3 py-2 d-block">
-            <router-link class="routerlink" to="/events">
+          <router-link class="routerlink" to="/events">  <a href="#" class="text-decoration-none px-3 py-2 d-block">
+           
                <font-awesome-icon :icon="['fas', 'calendar-alt']" /> <span v-if="!isSidebarActive">Events</span>
+           </a>
           </router-link>
-          </a>
+         
         </li>
         <li :class="{ active: activeTab === 'payments' }" @click="activateTab('payments')">
           <a href="#" class="text-decoration-none px-3 py-2 d-block">
