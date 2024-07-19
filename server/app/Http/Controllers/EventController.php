@@ -23,7 +23,9 @@ class EventController extends Controller
             'name'=>'required',
             'venue'=>'required',
             'location'=>'required',
-            'user_id'=>'required'
+            'user_id'=>'required',
+            'date'=>'required',
+            'time'=>'required'
 
         ]);
        
