@@ -1,10 +1,14 @@
+// router/index.js
 import { createRouter, createWebHistory } from 'vue-router';
 import LoginPage from '../components/LoginPage.vue';
 import AddEvent from '../components/AddEvent.vue';
 import RegisterPage from '../components/RegisterPage.vue';
-import MainLayout from '../components/MainLayout.vue'; // New layout component
+import MainLayout from '../components/MainLayout.vue';
 import AuthLayout from '../components/AuthLayout.vue';
 import EventsHome from '../components/EventsHome.vue';
+import Dashboard from '@/components/DashboardPage.vue';
+import store from '../components/store'; // Assuming your Vuex store is in the root
+
 const routes = [
   {
     path: '/',
@@ -16,15 +20,11 @@ const routes = [
   },
   {
     path: '/',
-    name: 'main',
-    components: {
-      default: MainLayout,
-    },
+    component: MainLayout,
     children: [
-      
-      { path: 'event/create', name: 'addevent', component: AddEvent },
-     { path: 'events', name: 'viewevents', component: EventsHome },
-   
+      { path: 'event/create', name: 'addevent', component: AddEvent, meta: { requiresAuth: true } },
+      { path: 'events', name: 'viewevents', component: EventsHome, meta: { requiresAuth: true } },
+      { path: 'dashboard', name: 'dashboard', component: Dashboard, meta: { requiresAuth: true } }
     ],
   },
 ];
@@ -32,6 +32,16 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const isLoggedIn = store.state.user.userId !== null; // Check if userId is not null or undefined
+
+  if (to.matched.some(record => record.meta.requiresAuth) && !isLoggedIn) {
+    next({ name: 'login' }); // Redirect to login if route requires authentication and user is not logged in
+  } else {
+    next(); // Continue to the requested route
+  }
 });
 
 export default router;
