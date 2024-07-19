@@ -42,5 +42,5 @@ Route::post('/ticket/create', [TicketController::class, 'storeTickets']);
 
 Route::post('/register',[RegisterController::class,'register']);
 
-Route::post('/logout',[RegisterController::class,'logout']);
+Route::post('/logout',[LoginController::class,'logout']);
 Route::post('/login',[LoginController::class,'login']);
