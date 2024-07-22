@@ -37,6 +37,9 @@ Route::group(['middleware' => 'cors'], function () {
 
 Route::post('/events',[EventController::class,'getEvents']);
 Route::post('/event/create',[EventController::class,'store']);
+
+Route::get('/event/{id}',[EventController::class,'showEventById']);
+
 Route::post('/ticket/create', [TicketController::class, 'storeTickets']);
 
 
