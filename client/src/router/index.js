@@ -7,6 +7,7 @@ import MainLayout from '../components/MainLayout.vue';
 import AuthLayout from '../components/AuthLayout.vue';
 import EventsHome from '../components/EventsHome.vue';
 import Dashboard from '@/components/DashboardPage.vue';
+import TicketInfo from '../components/TicketInfo.vue'
 import store from '../components/store'; // Assuming your Vuex store is in the root
 
 const routes = [
@@ -24,7 +25,8 @@ const routes = [
     children: [
       { path: 'event/create', name: 'addevent', component: AddEvent, meta: { requiresAuth: true } },
       { path: 'events', name: 'viewevents', component: EventsHome, meta: { requiresAuth: true } },
-      { path: 'dashboard', name: 'dashboard', component: Dashboard, meta: { requiresAuth: true } }
+      { path: 'dashboard', name: 'dashboard', component: Dashboard, meta: { requiresAuth: true } },
+      { path: '/ticket-info/:eventId',  name: 'TicketInfo',component: TicketInfo,  props: true, meta: { requiresAuth: true } }
     ],
   },
 ];
