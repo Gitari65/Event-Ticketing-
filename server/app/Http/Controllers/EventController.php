@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Event;
+use PhpParser\Node\Stmt\TryCatch;
 
 class EventController extends Controller
 {
@@ -40,5 +41,15 @@ class EventController extends Controller
     public function  getEvents(){
         $events=Event::all();
         return response()->json(['events'=>$events],200);
+    }
+    public function showEventById($eventId){
+  try {
+   
+    $event=Event::with('tickets')->findOrFail($eventId);
+   return response()->json($event);
+    } catch (\Exception $e) {
+    //throw $th;
+    return response()->json(['message' => 'Event not found'], 404);
+  }
     }
 }
