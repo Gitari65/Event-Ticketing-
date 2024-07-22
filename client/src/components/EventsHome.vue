@@ -21,8 +21,8 @@
 
     <!-- Events Listing -->
     <div class="row mt-4">
-      <div v-for="(event, index) in filteredEvents" :key="index" class="col-md-4">
-        <div class="card">
+      <div v-for="(event, index) in filteredEvents" :key="index" class="col-sm-4 col-md-4 col-lg-3 ">
+        <div class="card" @click="goToTicketInfo(event.id)">
           <img src="../assets/images/image.png" class="card-img-top" alt="Event Image">
           <div class="card-body">
             <h5 class="card-title">{{ event.name }}</h5>
@@ -40,6 +40,7 @@
 <script>
 import axios from 'axios';
 import { mapState } from 'vuex';
+import { useRouter } from 'vue-router';
 
 export default {
   data() {
@@ -51,6 +52,12 @@ export default {
       errorMessage: 'Error fetching events. Please try again.',
       loading: false
     };
+  },
+  setup(){
+    const router=useRouter();
+    return{
+      router,
+    }
   },
   computed: {
     ...mapState(['user'])
@@ -99,7 +106,9 @@ export default {
       console.log("Checking event:", event);
       console.log("Event user ID:", event.user_id, "Current user ID:", this.user.userId);
       return event.user_id === this.user.userId;
-    }
+    },  goToTicketInfo(eventId){
+      this.router.push({name:'TicketInfo',params:{eventId}})
+    },
   }
 };
 </script>
@@ -107,5 +116,7 @@ export default {
 <style scoped>
 .card {
   margin-bottom: 20px;
+ 
 }
+
 </style>
