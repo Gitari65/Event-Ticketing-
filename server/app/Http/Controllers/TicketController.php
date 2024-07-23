@@ -30,4 +30,5 @@ class TicketController extends Controller
             'message' => 'Tickets created successfully',
         ], 201);
     }
+  
 }
