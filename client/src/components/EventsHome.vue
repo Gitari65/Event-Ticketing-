@@ -23,7 +23,7 @@
     <div class="row mt-4">
       <div v-for="(event, index) in filteredEvents" :key="index" class="col-sm-4 col-md-4 col-lg-3 ">
         <div class="card" @click="goToTicketInfo(event.id)">
-          <img src="../assets/images/image.png" class="card-img-top" alt="Event Image">
+          <img src="../assets/images/event poster.jpeg" class="card-img-top" alt="Event Image">
           <div class="card-body">
             <h5 class="card-title">{{ event.name }}</h5>
             <p class="card-text">{{ event.venue }}</p>
