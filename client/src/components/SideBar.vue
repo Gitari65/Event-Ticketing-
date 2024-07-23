@@ -120,6 +120,7 @@ export default {
     toggleSidebar() {
       this.isSidebarActive = !this.isSidebarActive;
     },
+  
     activateTab(tabName) {
       this.activeTab = tabName;
     },
