@@ -76,7 +76,8 @@ export default {
         tickets: []
       },
       defaultImage: '../assets/images/event poster.jpeg',
-      step: 1
+      step: 1,
+      total:0,
     };
   },
   mounted() {
@@ -93,9 +94,17 @@ export default {
       }
     },
     calculateTotal() {
-      return this.event.tickets.reduce((total, ticket) => total + ticket.selectedAmount * ticket.price, 0);
+      const totalPrice=this.event.tickets.reduce((total, ticket) => total + ticket.selectedAmount * ticket.price, 0)
+      this.total=totalPrice;
+      return totalPrice;
     },
     goToStep(step) {
+    
+      if(this.total==0){
+        alert('To Proceed chose a ticket to buy.');
+        this.step = step-1;
+      }
+      else
       this.step = step;
     },
     selectedTickets() {
