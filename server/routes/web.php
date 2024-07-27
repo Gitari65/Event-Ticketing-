@@ -49,5 +49,8 @@ Route::post('/ticket/create', [TicketController::class, 'storeTickets']);
 
 Route::post('/register',[RegisterController::class,'register']);
 
+Route::post('/payment/initiate', [PaymentController::class, 'initiatePayment']);
+Route::post('/payment/mpesa-callback', [PaymentController::class, 'mpesaCallback'])->name('mpesa.callback');
+
 Route::post('/logout',[LoginController::class,'logout']);
 Route::post('/login',[LoginController::class,'login']);
