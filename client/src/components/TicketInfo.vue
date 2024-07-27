@@ -111,8 +111,17 @@ export default {
       return this.event.tickets.filter(ticket => ticket.selectedAmount > 0);
     },
     confirmPurchase() {
-      // Implement the logic to handle the ticket purchase confirmation
-      alert('Tickets confirmed for purchase.');
+      const phoneNumber = prompt("Enter your phone number");
+      const amount = this.calculateTotal();
+
+      axios.post('/payment/initiate', {
+        phone_number: phoneNumber,
+        amount: amount
+      }).then(response => {
+        alert('Payment initiated. Please check your phone to complete the payment.');
+      }).catch(error => {
+        console.error('Error initiating payment:', error);
+      });
     }
   }
 };
