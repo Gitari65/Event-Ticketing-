@@ -19,19 +19,30 @@
       </div>
       <div class="row">
         <div class="col-12">
-          <div class="row">
-            <div v-for="ticket in event.tickets" :key="ticket.id" class="col-sm-6 col-md-4 ticket-type mb-3">
-              <div class="ticket-info p-3 border rounded">
-                <p><i class="fas fa-ticket-alt"></i> <strong>Type:</strong> {{ ticket.type }}</p>
-                <p><i class="fas fa-dollar-sign"></i> <strong>Price:</strong> ${{ ticket.price }}</p>
-                <p><i class="fas fa-box"></i> <strong>Available:</strong> {{ ticket.amount }}</p>
-                <div class="form-group">
-                  <label for="amount"><i class="fas fa-sort-numeric-up"></i> <strong>Amount:</strong></label>
-                  <input type="number" v-model.number="ticket.selectedAmount" min="0" max="ticket.amount" class="form-control" />
-                </div>
-              </div>
-            </div>
-          </div>
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Type of Ticket</th>
+                <th>Price</th>
+                <th>Amount</th>
+                <th>Unit Total</th>
+                <th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="ticket in event.tickets" :key="ticket.id">
+                <td>{{ ticket.type }}</td>
+                <td>${{ ticket.price }}</td>
+                <td>
+                  <select v-model.number="ticket.selectedAmount" class="form-control">
+                    <option v-for="n in 11" :key="n" :value="n - 1">{{ n - 1 }}</option>
+                  </select>
+                </td>
+                <td>${{ ticket.price }}</td>
+                <td>${{ ticket.selectedAmount * ticket.price }}</td>
+              </tr>
+            </tbody>
+          </table>
           <div class="row">
             <div class="col-12">
               <h3>Total: ${{ calculateTotal() }}</h3>
@@ -45,13 +56,33 @@
       <div class="row mb-3">
         <div class="col-12">
           <h2>Confirm Your Tickets</h2>
-          <div v-for="ticket in selectedTickets()" :key="ticket.id" class="ticket-info-confirm p-3 border rounded mb-3">
-            <p><strong>Type:</strong> {{ ticket.type }}</p>
-            <p><strong>Price:</strong> ${{ ticket.price }}</p>
-            <p><strong>Amount:</strong> {{ ticket.selectedAmount }}</p>
-            <p><strong>Total:</strong> ${{ ticket.selectedAmount * ticket.price }}</p>
+          <div class="receipt p-3 border rounded mb-3">
+            <h3>Receipt</h3>
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Price</th>
+                  <th>Amount</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="ticket in selectedTickets()" :key="ticket.id">
+                  <td>{{ ticket.type }}</td>
+                  <td>${{ ticket.price }}</td>
+                  <td>{{ ticket.selectedAmount }}</td>
+                  <td>${{ ticket.selectedAmount * ticket.price }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" class="text-right"><strong>Total:</strong></td>
+                  <td>${{ calculateTotal() }}</td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
-          <h3>Total Amount to Pay: ${{ calculateTotal() }}</h3>
           <button class="btn btn-secondary" @click="goToStep(1)">Back</button>
           <button class="btn btn-success" @click="confirmPurchase">Confirm</button>
         </div>
@@ -77,7 +108,7 @@ export default {
       },
       defaultImage: '../assets/images/event poster.jpeg',
       step: 1,
-      total:0,
+      total: 0,
     };
   },
   mounted() {
@@ -88,40 +119,39 @@ export default {
       try {
         const response = await axios.get(`http://127.0.0.1:8000/event/${this.eventId}`);
         this.event = response.data;
-        this.event.tickets.forEach(ticket => ticket.selectedAmount = 0);
+        this.event.tickets.forEach(ticket => (ticket.selectedAmount = 0));
       } catch (error) {
         console.error('Error fetching event details:', error);
       }
     },
     calculateTotal() {
-      const totalPrice=this.event.tickets.reduce((total, ticket) => total + ticket.selectedAmount * ticket.price, 0)
-      this.total=totalPrice;
+      const totalPrice = this.event.tickets.reduce((total, ticket) => total + ticket.selectedAmount * ticket.price, 0);
+      this.total = totalPrice;
       return totalPrice;
     },
     goToStep(step) {
-    
-      if(this.total==0){
-        alert('To Proceed chose a ticket to buy.');
-        this.step = step-1;
+      if (this.total === 0) {
+        alert('To proceed, choose a ticket to buy.');
+        this.step = step - 1;
+      } else {
+        this.step = step;
       }
-      else
-      this.step = step;
     },
     selectedTickets() {
       return this.event.tickets.filter(ticket => ticket.selectedAmount > 0);
     },
-    confirmPurchase() {
+    async confirmPurchase() {
       const phoneNumber = prompt("Enter your phone number");
       const amount = this.calculateTotal();
-
-      axios.post('/payment/initiate', {
-        phone_number: phoneNumber,
-        amount: amount
-      }).then(response => {
+      try {
+        await axios.post('/payment/initiate', {
+          phone_number: phoneNumber,
+          amount: amount
+        });
         alert('Payment initiated. Please check your phone to complete the payment.');
-      }).catch(error => {
+      } catch (error) {
         console.error('Error initiating payment:', error);
-      });
+      }
     }
   }
 };
@@ -163,8 +193,12 @@ export default {
   background-color: #2980b9;
 }
 
-.ticket-info-confirm {
+.receipt {
   background: #f9f9f9;
   border-radius: 10px;
+}
+
+h3 {
+  margin-bottom: 20px;
 }
 </style>
