@@ -84,7 +84,37 @@
             </table>
           </div>
           <button class="btn btn-secondary" @click="goToStep(1)">Back</button>
-          <button class="btn btn-success" @click="confirmPurchase">Confirm</button>
+          <button class="btn btn-success" @click="showPaymentModal">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="paymentModalLabel">Confirm Payment</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="payWithMpesa" v-model="payWithMpesa">
+              <label class="form-check-label" for="payWithMpesa">
+                Pay with Mpesa
+              </label>
+            </div>
+            <div v-if="payWithMpesa" class="form-group mt-3">
+              <label for="phoneNumber">Phone Number</label>
+              <input type="text" class="form-control" id="phoneNumber" v-model="phoneNumber">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" @click="confirmPurchase">Pay</button>
+          </div>
         </div>
       </div>
     </div>
@@ -109,6 +139,8 @@ export default {
       defaultImage: '../assets/images/event poster.jpeg',
       step: 1,
       total: 0,
+      payWithMpesa: false,
+      phoneNumber: '',
     };
   },
   mounted() {
@@ -140,18 +172,30 @@ export default {
     selectedTickets() {
       return this.event.tickets.filter(ticket => ticket.selectedAmount > 0);
     },
+    showPaymentModal() {
+      $('#paymentModal').modal('show');
+    },
     async confirmPurchase() {
-      const phoneNumber = prompt("Enter your phone number");
-      const amount = this.calculateTotal();
-      try {
-        await axios.post('/payment/initiate', {
-          phone_number: phoneNumber,
-          amount: amount
-        });
-        alert('Payment initiated. Please check your phone to complete the payment.');
-      } catch (error) {
-        console.error('Error initiating payment:', error);
+      if (this.payWithMpesa && !this.phoneNumber) {
+        alert('Please enter your phone number.');
+        return;
       }
+
+      const amount = this.calculateTotal();
+
+      if (this.payWithMpesa) {
+        try {
+          await axios.post('/payment/initiate', {
+            phone_number: this.phoneNumber,
+            amount: amount
+          });
+          alert('Payment initiated. Please check your phone to complete the payment.');
+        } catch (error) {
+          console.error('Error initiating payment:', error);
+        }
+      }
+
+      $('#paymentModal').modal('hide');
     }
   }
 };
