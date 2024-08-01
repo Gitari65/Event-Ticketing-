@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MpesaController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Http\Request;
 
@@ -49,8 +50,8 @@ Route::post('/ticket/create', [TicketController::class, 'storeTickets']);
 
 Route::post('/register',[RegisterController::class,'register']);
 
-Route::post('/payment/initiate', [PaymentController::class, 'initiatePayment']);
-Route::post('/payment/mpesa-callback', [PaymentController::class, 'mpesaCallback'])->name('mpesa.callback');
+Route::post('/payment/initiate', [MpesaController::class, 'initiatePayment']);
+Route::post('/payment/mpesa-callback', [MpesaController::class, 'mpesaCallback'])->name('mpesa.callback');
 
 Route::post('/logout',[LoginController::class,'logout']);
 Route::post('/login',[LoginController::class,'login']);
