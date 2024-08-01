@@ -5,6 +5,8 @@ import router from './router'
 import axios from './axios' // Import the axios configuration
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap/dist/js/bootstrap.bundle';
+
 import store from './components/store'
 
 
