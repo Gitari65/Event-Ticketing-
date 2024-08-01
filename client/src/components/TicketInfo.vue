@@ -90,13 +90,13 @@
     </div>
 
     <!-- Payment Modal -->
-    <div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true" ref="paymentModal">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="paymentModalLabel">Confirm Payment</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
+              <span aria-hidden="true" @click="hidePaymentModal">&times;</span>
             </button>
           </div>
           <div class="modal-body">
@@ -112,7 +112,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="hidePaymentModal">Cancel</button>
             <button type="button" class="btn btn-primary" @click="confirmPurchase">Pay</button>
           </div>
         </div>
@@ -173,7 +173,18 @@ export default {
       return this.event.tickets.filter(ticket => ticket.selectedAmount > 0);
     },
     showPaymentModal() {
-      $('#paymentModal').modal('show');
+      const modalElement = this.$refs.paymentModal;
+      modalElement.classList.add('show');
+      modalElement.style.display = 'block';
+      modalElement.setAttribute('aria-modal', 'true');
+      modalElement.removeAttribute('aria-hidden');
+    },
+    hidePaymentModal() {
+      const modalElement = this.$refs.paymentModal;
+      modalElement.classList.remove('show');
+      modalElement.style.display = 'none';
+      modalElement.removeAttribute('aria-modal');
+      modalElement.setAttribute('aria-hidden', 'true');
     },
     async confirmPurchase() {
       if (this.payWithMpesa && !this.phoneNumber) {
@@ -185,7 +196,7 @@ export default {
 
       if (this.payWithMpesa) {
         try {
-          await axios.post('/payment/initiate', {
+          await axios.post('http://127.0.0.1:8000/payment/initiate', {
             phone_number: this.phoneNumber,
             amount: amount
           });
@@ -195,7 +206,7 @@ export default {
         }
       }
 
-      $('#paymentModal').modal('hide');
+      this.hidePaymentModal();
     }
   }
 };
