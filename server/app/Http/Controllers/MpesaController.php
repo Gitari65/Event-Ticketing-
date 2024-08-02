@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\MpesaService;
 use Illuminate\Http\Request;
 
-class PaymentController extends Controller
+class MpesaController extends Controller
 {
     protected $mpesaService;
 
@@ -36,5 +36,6 @@ class PaymentController extends Controller
         Log::info('M-Pesa Callback:', $request->all());
 
         // Process the callback data here
+
     }
 }
