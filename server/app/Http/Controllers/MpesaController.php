@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\MpesaService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log; // Add this line
 
 class MpesaController extends Controller
 {
