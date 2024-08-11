@@ -12,7 +12,7 @@ class MpesaService
     public function __construct()
     {
         $this->client = new Client([
-            'verify' => 'c:\xampp1\cacert.pem' // Ensure this path is correct and accessible
+            'verify' => 'C:\xampp1\cacert.pem' // Ensure this path is correct and accessible
         ]);
     }
 
