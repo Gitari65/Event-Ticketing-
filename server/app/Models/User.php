@@ -49,4 +49,8 @@ class User extends Authenticatable
     public function userEvents(){
         return $this->hasMany(Event::class,'user_id');
     }
+    public function views()
+{
+    return $this->hasMany(View::class);
+}
 }
