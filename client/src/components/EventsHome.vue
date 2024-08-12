@@ -22,7 +22,7 @@
     <!-- Events Listing -->
     <div class="row mt-4">
       <div v-for="(event, index) in filteredEvents" :key="index" class="col-sm-4 col-md-4 col-lg-3 ">
-        <div class="card" @click="goToTicketInfo(event.id)">
+        <div class="card" @click="goToTicketInfo(event.id);viewEvent(event.id)">
           <img src="../assets/images/event poster.jpeg" class="card-img-top" alt="Event Image">
           <div class="card-body">
             <h5 class="card-title">{{ event.name }}</h5>
@@ -109,6 +109,27 @@ export default {
     },  goToTicketInfo(eventId){
       this.router.push({name:'TicketInfo',params:{eventId}})
     },
+    async viewEvent(eventId) {
+      await axios.post('http://127.0.0.1:8000/views/update', {
+        event_id: eventId,
+        user_id: this.$store.state.user.id // Assuming user ID is stored in Vuex
+      })
+      .then(response => {
+        console.log('View count updated successfully:', response.data);
+      })
+      .catch(error => {
+        console.error('Error updating view count:', error);
+      });
+    },
+    fetchEvents() {
+      axios.get('/api/events')
+        .then(response => {
+          this.events = response.data;
+        })
+        .catch(error => {
+          console.error('Error fetching events:', error);
+        });
+    }
   }
 };
 </script>
