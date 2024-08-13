@@ -52,4 +52,18 @@ class EventController extends Controller
     return response()->json(['message' => 'Event not found'], 404);
   }
     }
+    public function index()
+{
+    $recentEvents = Event::orderBy('created_at', 'desc')->take(10)->get();
+    $trendingEvents = Event::withCount('views')
+                            ->orderBy('views_count', 'desc')
+                            ->take(10)
+                            ->get();
+
+    return response()->json([
+        'recent' => $recentEvents,
+        'trending' => $trendingEvents,
+    ]);
+}
+
 }
