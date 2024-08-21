@@ -81,6 +81,16 @@
       <button @click.prevent="editForm" class="btn btn-warning me-2">Edit</button>
       <button @click.prevent="submitForm" class="btn btn-success">Submit</button>
     </div>
+
+     <!-- Step 4: Upload Image -->
+     <form v-if="step === 4" @submit.prevent="uploadImage">
+      <h2>Upload Event Image</h2>
+      <div class="mb-3">
+        <label for="image" class="form-label">Select Image:</label>
+        <input type="file" id="image" @change="onFileChange" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
   </div>
 </template>
 
@@ -123,6 +133,25 @@ export default {
     }
   },
   methods: {
+    onFileChange(e) {
+      this.image = e.target.files[0];
+    },
+    async uploadImage() {
+      const formData = new FormData();
+      formData.append('event_id', this.eventId);
+      formData.append('image', this.image);
+
+      try {
+        const response = await axios.post('http://127.0.0.1:8000/image/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        this.successMessage = response.data.success;
+      } catch (error) {
+        this.errorMessage = error.response.data.message || 'Image upload failed';
+      }
+    },
     nextStep() {
       if (this.step < 3) {
         this.step++;
@@ -141,48 +170,41 @@ export default {
       }
     },
     async submitForm() {
-  this.loading = true;
-  this.errorMessage = '';
-  this.successMessage = '';
+    this.loading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
 
-  try {
-    // Check if the user is logged in
-    if (!this.user || !this.user.id) {
+    try {
+      if (!this.user || !this.user.id) {
         this.loading = false;
-      this.errorMessage = 'User not logged in';
-      throw new Error('User not logged in');
-    
-    }
+        this.errorMessage = 'User not logged in';
+        throw new Error('User not logged in');
+      }
 
-    // Assign the user ID to the event object
-    this.event.user_id = this.user.id;
+      this.event.user_id = this.user.id;
 
-    // Send event creation request
-    const eventResponse = await axios.post('http://127.0.0.1:8000/event/create', this.event);
+      const eventResponse = await axios.post('http://127.0.0.1:8000/event/create', this.event);
 
-    if (!eventResponse.data || !eventResponse.data.eventId) {
+      if (!eventResponse.data || !eventResponse.data.eventId) {
+        this.loading = false;
+        throw new Error('Invalid event response structure');
+      }
+
+      this.eventId = eventResponse.data.eventId;
+
+      await axios.post('http://127.0.0.1:8000/ticket/create', {
+        tickets: this.tickets,
+        eventId: this.eventId
+      });
+
       this.loading = false;
-      this.errorMessage('error while trying to save event')
-      throw new Error('Invalid event response structure');
-      
+      this.step = 4; // Move to the image upload step
+    } catch (error) {
+      this.loading = false;
+      this.errorMessage = error.message || 'Error creating event and tickets';
+      console.error('Error creating event and tickets:', error);
     }
-
-    this.eventId = eventResponse.data.eventId;
-
-    // Send ticket creation request
-    await axios.post('http://127.0.0.1:8000/ticket/create', {
-      tickets: this.tickets,
-      eventId: this.eventId
-    });
-
-    this.loading = false;
-    this.successMessage = 'Event and tickets created successfully!';
-  } catch (error) {
-    this.loading = false;
-    this.errorMessage = error.message || 'Error creating event and tickets';
-    console.error('Error creating event and tickets:', error);
   }
-}
 
   }
 };
