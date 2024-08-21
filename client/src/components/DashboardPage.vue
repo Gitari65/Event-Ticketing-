@@ -1,31 +1,21 @@
-<script setup lang="ts">
-import { computed, ref, onMounted } from 'vue';
-import { useStore } from 'vuex';
-import axios from 'axios';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-</script>
-
 <template>
   <div class="container">
     <!-- Greeting and Profile Section -->
     <div class="row my-4">
       <div class="col-md-12 text-center">
-        <p class="display-4 animate__animated animate__fadeInDown">{{ greeting }}, {{ user.name }}!</p>
-        <img :src="user.profilePicture" alt="User Image" class="rounded-circle animate__animated animate__fadeInUp" width="150">
+        <p class="display-4">{{ greeting }}, {{ user.name }}!</p>
+        <img :src="user.profilePicture" alt="User Image" class="rounded-circle" width="150">
       </div>
     </div>
 
     <!-- Trending Events Section -->
     <div class="row my-4">
-      <div class="col-md-12 d-flex justify-content-between align-items-center">
-        <h3 class="animate__animated animate__fadeInLeft">Trending Events</h3>
-        <div @click="redirectToEvents" class="arrow-container animate__animated animate__bounceInRight">
-          <FontAwesomeIcon icon="fa-sharp fa-solid fa-arrow-right" />
-        </div>
+      <div class="col-md-12">
+        <h3>Trending Events</h3>
       </div>
-      <div v-if="trendingEvents.length > 0" class="row">
+      <div v-if="trendingEvents.length > 0" class="d-flex flex-row flex-nowrap overflow-hidden">
         <div v-for="event in trendingEvents" :key="event.id" class="col-sm-2 col-md-5 col-lg-6 mb-4">
-          <div class="card h-100 animate__animated animate__fadeInUp" @click="viewEvent(event.id)">
+          <div class="card h-100" @click="viewEvent(event.id)">
             <img :src="event.image" class="card-img-top" alt="Event Image">
             <div class="card-body">
               <h5 class="card-title">{{ event.title }}</h5>
@@ -33,6 +23,13 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
               <p class="event-date">{{ formatDate(event.date) }}</p>
             </div>
           </div>
+        </div>
+        <div class="col-auto align-self-center">
+          <FontAwesomeIcon 
+            icon="fa-solid fa-arrow-right"
+            class="arrow-icon"
+            @click="goToEvents"
+          />
         </div>
       </div>
       <div v-else>
@@ -42,15 +39,12 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
     <!-- Recent Events Section -->
     <div class="row my-4">
-      <div class="col-md-12 d-flex justify-content-between align-items-center">
-        <h3 class="animate__animated animate__fadeInLeft">Recent Events</h3>
-        <div @click="redirectToEvents" class="arrow-container animate__animated animate__bounceInRight">
-          <FontAwesomeIcon icon="fa-sharp fa-solid fa-arrow-right" />
-        </div>
+      <div class="col-md-12">
+        <h3>Recent Events</h3>
       </div>
-      <div v-if="recentEvents.length > 0" class="row">
+      <div v-if="recentEvents.length > 0" class="d-flex flex-row flex-nowrap overflow-hidden">
         <div v-for="event in recentEvents" :key="event.id" class="col-sm-2 col-md-5 col-lg-6 mb-4">
-          <div class="card h-100 animate__animated animate__fadeInUp" @click="viewEvent(event.id)">
+          <div class="card h-100" @click="viewEvent(event.id)">
             <img :src="event.image" class="card-img-top" alt="Event Image">
             <div class="card-body">
               <h5 class="card-title">{{ event.title }}</h5>
@@ -58,6 +52,13 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
               <p class="event-date">{{ formatDate(event.date) }}</p>
             </div>
           </div>
+        </div>
+        <div class="col-auto align-self-center">
+          <FontAwesomeIcon 
+            icon="fa-solid fa-arrow-right"
+            class="arrow-icon"
+            @click="goToEvents"
+          />
         </div>
       </div>
       <div v-else>
@@ -68,27 +69,15 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 </template>
 
 <script>
+import { computed, ref, onMounted } from 'vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import axios from 'axios';
+import { useStore } from 'vuex';
+
 export default {
   name: 'DashboardPage',
-  methods: {
-    async viewEvent(eventId) {
-      try {
-        await axios.post('http://127.0.0.1:8000/views/update', {
-          event_id: eventId,
-          user_id: this.$store.state.user.id
-        });
-        console.log('View count updated successfully');
-      } catch (error) {
-        console.error('Error updating view count:', error);
-      }
-    },
-    formatDate(date) {
-      const options = { year: 'numeric', month: 'long', day: 'numeric' };
-      return new Date(date).toLocaleDateString(undefined, options);
-    },
-    redirectToEvents() {
-      this.$router.push('/events');
-    }
+  components: {
+    FontAwesomeIcon,
   },
   setup() {
     const store = useStore();
@@ -118,25 +107,50 @@ export default {
       }
     });
 
+    const viewEvent = async (eventId) => {
+      await axios.post('http://127.0.0.1:8000/views/update', {
+        event_id: eventId,
+        user_id: store.state.user.id
+      })
+      .then(response => {
+        console.log('View count updated successfully:', response.data);
+      })
+      .catch(error => {
+        console.error('Error updating view count:', error);
+      });
+    };
+
+    const formatDate = (date) => {
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(date).toLocaleDateString(undefined, options);
+    };
+
+    const goToEvents = () => {
+      this.$router.push('/events');
+    };
+
     return {
       user,
       greeting,
       trendingEvents,
       recentEvents,
+      viewEvent,
+      formatDate,
+      goToEvents
     };
   }
 };
 </script>
 
 <style scoped>
-@import 'animate.css';
-
 .text-center {
   text-align: center;
 }
 
 .card {
   position: relative;
+  width: 190px;
+  height: 254px;
   background-color: #000;
   display: flex;
   flex-direction: column;
@@ -150,7 +164,7 @@ export default {
 }
 
 .card:hover {
-  transform: scale(1.05) rotate(3deg);
+  transform: scale(1.05);
 }
 
 .card::before {
@@ -209,24 +223,13 @@ export default {
   right: 12px;
 }
 
-.arrow-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.arrow-icon {
+  font-size: 24px;
   cursor: pointer;
+  transition: transform 0.3s;
 }
 
-.arrow-container:hover {
-  transform: translateX(5px) scale(1.1);
-}
-
-.arrow-container .fa-arrow-right {
-  font-size: 1.5rem;
-  color: #007bff;
-  transition: transform 0.3s ease, color 0.3s ease;
-}
-
-.arrow-container:hover .fa-arrow-right {
-  color: #0056b3;
+.arrow-icon:hover {
+  transform: scale(1.2);
 }
 </style>
