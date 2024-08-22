@@ -14,7 +14,7 @@
         <h3>Trending Events</h3>
       </div>
       <div v-if="trendingEvents.length > 0" class="d-flex flex-row flex-nowrap overflow-hidden">
-        <div v-for="event in trendingEvents" :key="event.id" class="col-sm-2 col-md-5 col-lg-6 mb-4">
+        <div v-for="event in trendingEvents" :key="event.id" class="col-sm-5 col-md-2 col-lg-3 mb-4">
           <div class="card h-100" @click="viewEvent(event.id)">
             <img :src="event.image" class="card-img-top" alt="Event Image">
             <div class="card-body">
@@ -43,7 +43,7 @@
         <h3>Recent Events</h3>
       </div>
       <div v-if="recentEvents.length > 0" class="d-flex flex-row flex-nowrap overflow-hidden">
-        <div v-for="event in recentEvents" :key="event.id" class="col-sm-2 col-md-5 col-lg-6 mb-4">
+        <div v-for="event in recentEvents" :key="event.id" class="col-sm-5 col-md-2 col-lg-3 mb-4">
           <div class="card h-100" @click="viewEvent(event.id)">
             <img :src="event.image" class="card-img-top" alt="Event Image">
             <div class="card-body">
@@ -70,7 +70,11 @@
 
 <script>
 import { computed, ref, onMounted } from 'vue';
+import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
+
+library.add(faArrowRight);
 import axios from 'axios';
 import { useStore } from 'vuex';
 
