@@ -12,6 +12,7 @@
       <div class="circle" :class="{ active: step >= 1 }">1</div>
       <div class="circle" :class="{ active: step >= 2 }">2</div>
       <div class="circle" :class="{ active: step >= 3 }">3</div>
+      <div class="circle" :class="{ active: step >= 4 }">4</div>
     </div>
 
     <!-- Form steps -->
@@ -78,18 +79,19 @@
           <p><strong>Ticket {{ index + 1 }}:</strong> {{ ticket.type }} - ${{ ticket.price }} ({{ ticket.amount }} available)</p>
         </div>
       </div>
-      <button @click.prevent="editForm" class="btn btn-warning me-2">Edit</button>
-      <button @click.prevent="submitForm" class="btn btn-success">Submit</button>
+      <button @click.prevent="editForm(2)" class="btn btn-warning me-2">Edit Tickets</button>
+      <button @click.prevent="submitForm" class="btn btn-primary">Next</button>
     </div>
 
-     <!-- Step 4: Upload Image -->
-     <form v-if="step === 4" @submit.prevent="uploadImage">
+    <!-- Step 4: Upload Image -->
+    <form v-if="step === 4" @submit.prevent="submitForm">
       <h2>Upload Event Image</h2>
       <div class="mb-3">
         <label for="image" class="form-label">Select Image:</label>
         <input type="file" id="image" @change="onFileChange" class="form-control" required>
       </div>
-      <button type="submit" class="btn btn-primary">Upload</button>
+      <button @click.prevent="editForm(3)" class="btn btn-warning me-2">Edit Event Details</button>
+      <button type="submit" class="btn btn-success">Submit</button>
     </form>
   </div>
 </template>
@@ -114,6 +116,7 @@ export default {
         time: ''
       },
       tickets: [{ type: '', price: 0, amount: 0 }],
+      image: null,
       loading: false,
       errorMessage: '',
       successMessage: ''
@@ -129,31 +132,12 @@ export default {
       return this.$store.state.user;
     },
     progressPercentage() {
-      return (this.step / 3) * 100;
+      return (this.step / 4) * 100;
     }
   },
   methods: {
-    onFileChange(e) {
-      this.image = e.target.files[0];
-    },
-    async uploadImage() {
-      const formData = new FormData();
-      formData.append('event_id', this.eventId);
-      formData.append('image', this.image);
-
-      try {
-        const response = await axios.post('http://127.0.0.1:8000/image/upload', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        this.successMessage = response.data.success;
-      } catch (error) {
-        this.errorMessage = error.response.data.message || 'Image upload failed';
-      }
-    },
     nextStep() {
-      if (this.step < 3) {
+      if (this.step < 4) {
         this.step++;
       }
     },
@@ -163,49 +147,67 @@ export default {
     removeTicket(index) {
       this.tickets.splice(index, 1);
     },
-    editForm() {
-      // Go back to the appropriate step for editing
-      if (this.step === 3) {
-        this.step = 1; // Go back to Step 1 for editing
-      }
+    editForm(step) {
+      this.step = step;
+    },
+    onFileChange(e) {
+      const file = e.target.files[0];
+      this.image = file;
     },
     async submitForm() {
-    this.loading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+      this.loading = true;
+      this.errorMessage = '';
+      this.successMessage = '';
 
-    try {
-      if (!this.user || !this.user.id) {
+      try {
+        if (!this.user || !this.user.id) {
+          this.loading = false;
+          this.errorMessage = 'User not logged in';
+          throw new Error('User not logged in');
+        }
+
+        this.event.user_id = this.user.id;
+
+        // Handle event and ticket creation only at Step 3
+        if (this.step === 3) {
+          const eventResponse = await axios.post('http://127.0.0.1:8000/event/create', this.event);
+
+          if (!eventResponse.data || !eventResponse.data.eventId) {
+            this.loading = false;
+            throw new Error('Invalid event response structure');
+          }
+
+          this.eventId = eventResponse.data.eventId;
+
+          await axios.post('http://127.0.0.1:8000/ticket/create', {
+            tickets: this.tickets,
+            eventId: this.eventId
+          });
+
+          this.step = 4; // Move to Step 4 for image upload
+          this.loading = false;
+        } else if (this.step === 4) {
+          // Handle image upload on Step 4
+          const formData = new FormData();
+          formData.append('event_id', this.eventId);
+          formData.append('image', this.image);
+
+          const response = await axios.post('http://127.0.0.1:8000/image/upload', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+
+          this.successMessage = response.data.success;
+          this.loading = false;
+          this.step = 1; // Reset to Step 1 or move to a success page as needed
+        }
+      } catch (error) {
         this.loading = false;
-        this.errorMessage = 'User not logged in';
-        throw new Error('User not logged in');
+        this.errorMessage = error.message || 'Error during submission process';
+        console.error('Error during submission process:', error);
       }
-
-      this.event.user_id = this.user.id;
-
-      const eventResponse = await axios.post('http://127.0.0.1:8000/event/create', this.event);
-
-      if (!eventResponse.data || !eventResponse.data.eventId) {
-        this.loading = false;
-        throw new Error('Invalid event response structure');
-      }
-
-      this.eventId = eventResponse.data.eventId;
-
-      await axios.post('http://127.0.0.1:8000/ticket/create', {
-        tickets: this.tickets,
-        eventId: this.eventId
-      });
-
-      this.loading = false;
-      this.step = 4; // Move to the image upload step
-    } catch (error) {
-      this.loading = false;
-      this.errorMessage = error.message || 'Error creating event and tickets';
-      console.error('Error creating event and tickets:', error);
     }
-  }
-
   }
 };
 </script>
@@ -233,27 +235,26 @@ export default {
   position: absolute;
   top: 50%;
   left: 0;
-  height: 5px;
-  background: #3498db;
-  z-index: 9;
-  transition: width 0.3s;
+  height: 4px;
+  background: #4caf50;
+  transition: width 0.4s ease;
+  z-index: -1;
 }
 
 .circle {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: #e0e0e0;
+  background: #ddd;
   display: flex;
-  justify-content: center;
   align-items: center;
-  font-weight: bold;
+  justify-content: center;
+  z-index: 1;
 }
 
 .circle.active {
-  background: #3498db;
+  background: #4caf50;
   color: #fff;
-  z-index: 10;
 }
 
 .overlay {
@@ -262,17 +263,14 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
+  background: rgba(255, 255, 255, 0.7);
   display: flex;
-  justify-content: center;
   align-items: center;
-  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
   z-index: 1000;
 }
 
-.overlay > * {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
+.btn {
+  margin-right: 10px;
 }
 </style>
