@@ -1,16 +1,23 @@
 <template>
-  <div>
-    <div class="row">
-      <div class="col-md-4">
-        <router-link to="/event/create" class="btn btn-primary">Create Event</router-link>
+  <div class="container">
+    <!-- Greeting and Profile Section -->
+    <div class="row my-4">
+      <div class="col-12 text-center">
+        <p class="display-4">{{ greeting }}, {{ user.name }}!</p>
+        <div v-if="user.profilePicture">
+          <img :src="user.profilePicture" alt="User Image" class="rounded-circle" width="100">
+        </div>
+        <div v-else>
+          <img src="../assets/images/user.png" alt="User Image" class="rounded-circle" width="100">
+        </div>
       </div>
     </div>
 
-    <!-- Filters -->
+    <!-- Filters Section -->
     <div class="row mt-4">
       <div class="col-md-4">
         <label for="eventFilter">Filter by:</label>
-        <select v-model="filterType" id="eventFilter" @change="applyFilters">
+        <select v-model="filterType" id="eventFilter" class="form-select" @change="applyFilters">
           <option value="all">All Events</option>
           <option value="my">My Events</option>
           <option value="today">Today's Events</option>
@@ -21,9 +28,14 @@
 
     <!-- Events Listing -->
     <div class="row mt-4">
-      <div v-for="(event, index) in filteredEvents" :key="index" class="col-sm-4 col-md-4 col-lg-3 ">
-        <div class="card" @click="goToTicketInfo(event.id);viewEvent(event.id)">
-          <img src="../assets/images/event poster.jpeg" class="card-img-top" alt="Event Image">
+      <div v-for="(event, index) in filteredEvents" :key="index" class="col-sm-6 col-md-4 col-lg-3 mb-4">
+        <div class="card h-100" @click="goToTicketInfo(event.id); viewEvent(event.id)">
+          <div v-if="event.image">
+            <img :src="event.image" class="card-img-top" alt="Event Image">
+          </div>
+          <div v-else>
+            <img src="../assets/images/event poster.jpeg" class="card-img-top" alt="Event Image">
+          </div>
           <div class="card-body">
             <h5 class="card-title">{{ event.name }}</h5>
             <p class="card-text">{{ event.venue }}</p>
@@ -60,7 +72,17 @@ export default {
     }
   },
   computed: {
-    ...mapState(['user'])
+    ...mapState(['user']),
+    greeting() {
+      const hour = new Date().getHours();
+      if (hour >= 5 && hour < 12) {
+        return 'Good morning';
+      } else if (hour >= 12 && hour < 18) {
+        return 'Good afternoon';
+      } else {
+        return 'Good evening';
+      }
+    }
   },
   mounted() {
     this.getAllEvents();
@@ -69,8 +91,8 @@ export default {
     async getAllEvents() {
       this.loading = true;
       try {
-        const eventResponse = await axios.post('http://127.0.0.1:8000/events');
-        this.events = eventResponse.data.events;
+        const eventResponse = await axios.get('http://127.0.0.1:8000/events/byIndex');
+        this.events = eventResponse.data.recent.concat(eventResponse.data.trending);
         this.applyFilters(); // Apply initial filters
         console.log("Event data:", eventResponse.data);
       } catch (error) {
@@ -86,8 +108,6 @@ export default {
           console.log("Filtering 'My Events'");
           console.log("Stored user ID:", this.user.userId);
           filteredEvents = this.events.filter(event => this.isUserCreator(event));
-           // Sort the filtered events by date
-  filteredEvents.sort((b, a) => new Date(a.date) - new Date(b.date));
           break;
         }
         case 'today': {
@@ -102,11 +122,9 @@ export default {
       this.filteredEvents = filteredEvents;
     },
     isUserCreator(event) {
-      // Ensure this function is correctly checking the user ID
-      console.log("Checking event:", event);
-      console.log("Event user ID:", event.user_id, "Current user ID:", this.user.userId);
       return event.user_id === this.user.userId;
-    },  goToTicketInfo(eventId){
+    },  
+    goToTicketInfo(eventId){
       this.router.push({name:'TicketInfo',params:{eventId}})
     },
     async viewEvent(eventId) {
@@ -120,24 +138,89 @@ export default {
       .catch(error => {
         console.error('Error updating view count:', error);
       });
-    },
-    fetchEvents() {
-      axios.get('/api/events')
-        .then(response => {
-          this.events = response.data;
-        })
-        .catch(error => {
-          console.error('Error fetching events:', error);
-        });
     }
   }
 };
 </script>
 
 <style scoped>
-.card {
-  margin-bottom: 20px;
- 
+.text-center {
+  text-align: center;
 }
 
+.card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  padding: 12px;
+  gap: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  transition: transform 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  left: -5px;
+  margin: auto;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(-45deg, #f6a926 0%, #07407b 100%);
+  z-index: -10;
+  pointer-events: none;
+  transition: all 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card::after {
+  content: "";
+  z-index: -1;
+  position: absolute;
+  inset: 0;
+  background-color: #000;
+  transform: translate3d(0, 0, 0) scale(0.95);
+  filter: blur(20px);
+}
+
+.card:hover::after {
+  filter: blur(30px);
+}
+
+.card:hover::before {
+  transform: rotate(-90deg) scaleX(1.34) scaleY(0.77);
+}
+
+.heading {
+  font-size: 20px;
+  text-transform: capitalize;
+  font-weight: 700;
+}
+
+.card p:not(.heading) {
+  font-size: 14px;
+}
+
+.card p:last-child {
+  color: #f6a926;
+  font-weight: 600;
+}
+
+.event-date {
+  font-size: 12px;
+  color: #ccc;
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+}
 </style>
