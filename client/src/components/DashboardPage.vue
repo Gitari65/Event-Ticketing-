@@ -4,7 +4,13 @@
     <div class="row my-4">
       <div class="col-md-12 text-center">
         <p class="display-4">{{ greeting }}, {{ user.name }}!</p>
-        <img :src="user.profilePicture" alt="User Image" class="rounded-circle" width="150">
+        <div v-if="user.profilePicture">
+          <img :src="user.profilePicture" alt="User Image" class="rounded-circle" width="100">
+        </div>
+      
+        <div v-else>
+          <img src="../assets/images/user.png" alt="User Image" class="rounded-circle" width="100">
+        </div>
       </div>
     </div>
 
@@ -16,7 +22,12 @@
       <div v-if="trendingEvents.length > 0" class="d-flex flex-row flex-nowrap overflow-hidden">
         <div v-for="event in trendingEvents" :key="event.id" class="col-sm-5 col-md-2 col-lg-3 mb-4">
           <div class="card h-100" @click="viewEvent(event.id)">
-            <img :src="event.image" class="card-img-top" alt="Event Image">
+            <div v-if="event.image">
+              <img :src="event.image" class="card-img-top" alt="Event Image">
+            </div>
+            <div v-else>
+              <img src="../assets/images/eventposter.jpeg" class="card-img-top" alt="Event Image">
+            </div>
             <div class="card-body">
               <h5 class="card-title">{{ event.title }}</h5>
               <p class="card-text">{{ event.description }}</p>
@@ -45,7 +56,12 @@
       <div v-if="recentEvents.length > 0" class="d-flex flex-row flex-nowrap overflow-hidden">
         <div v-for="event in recentEvents" :key="event.id" class="col-sm-5 col-md-2 col-lg-3 mb-4">
           <div class="card h-100" @click="viewEvent(event.id)">
-            <img :src="event.image" class="card-img-top" alt="Event Image">
+            <div v-if="event.image">
+              <img :src="event.image" class="card-img-top" alt="Event Image">
+            </div>
+            <div v-else>
+              <img src="../assets/images/eventposter.jpeg" class="card-img-top" alt="Event Image">
+            </div>
             <div class="card-body">
               <h5 class="card-title">{{ event.title }}</h5>
               <p class="card-text">{{ event.description }}</p>
@@ -93,6 +109,7 @@ export default {
         const response = await axios.get('http://127.0.0.1:8000/events/byIndex');
         trendingEvents.value = response.data.trending;
         recentEvents.value = response.data.recent;
+        console.log('Trending events:', trendingEvents.value);
       } catch (error) {
         console.error('Error fetching events:', error);
       }
@@ -191,7 +208,7 @@ export default {
   z-index: -1;
   position: absolute;
   inset: 0;
-  background: linear-gradient(-45deg, #f6a926 0%, #07407b 100%);
+background-color: #000;
   transform: translate3d(0, 0, 0) scale(0.95);
   filter: blur(20px);
 }
