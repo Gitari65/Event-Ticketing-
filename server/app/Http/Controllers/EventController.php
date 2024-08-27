@@ -53,17 +53,17 @@ class EventController extends Controller
   }
     }
     public function index()
-{
-    $recentEvents = Event::orderBy('created_at', 'desc')->take(10)->get();
-    $trendingEvents = Event::withCount('views')
-                            ->orderBy('views_count', 'desc')
-                            ->take(10)
-                            ->get();
+                {
+                    $recentEvents = Event::orderBy('created_at', 'desc')->take(10)->get();
+                    $trendingEvents = Event::withCount('views')
+                                            ->orderBy('views_count', 'desc')
+                                            ->take(10)
+                                            ->get();
 
-    return response()->json([
-        'recent' => $recentEvents,
-        'trending' => $trendingEvents,
-    ]);
-}
+                    return response()->json([
+                        'recent' => $recentEvents,
+                        'trending' => $trendingEvents,
+                    ]);
+                }
 
 }
