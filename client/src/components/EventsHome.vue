@@ -262,7 +262,7 @@ export default {
   text-align: center;
   background: linear-gradient(-45deg, #f7f5f5 0%, #07407b 100%);
   border-radius: 50%;
-  width: 60%;
+  width: 40%;
 
 }
 
