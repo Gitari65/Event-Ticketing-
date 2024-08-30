@@ -38,8 +38,11 @@
           </div>
           <div class="card-body">
             <h5 class="card-title">{{ event.name }}</h5>
-            <p class="card-text">{{ event.venue }}</p>
-            <p class="card-text">{{ event.location }}</p>
+            <div class="event-date">
+                <span class="day">{{ formatDate(event.date, 'DD') }}</span>
+                <span class="month">{{ formatDate(event.date, 'MMM') }}</span>
+                <span class="year">{{ formatDate(event.date, 'YYYY') }}</span>
+              </div>
             <!-- Show edit icon if user is creator -->
             <router-link v-if="isUserCreator(event)" :to="`/edit/event/${event.id}`" class="btn btn-sm btn-outline-primary">Edit</router-link>
           </div>
@@ -86,6 +89,7 @@ export default {
   },
   mounted() {
     this.getAllEvents();
+    
   },
   methods: {
     async getAllEvents() {
@@ -138,6 +142,24 @@ export default {
       .catch(error => {
         console.error('Error updating view count:', error);
       });
+    },     formatDate (date, format) {
+         const newDate = new Date(date);
+
+          switch (format) {
+            case 'DD': {
+              return newDate.getDate().toString().padStart(2, '0'); // Day of the month with leading zero
+            }
+            case 'MMM': {
+              return newDate.toLocaleString('default', { month: 'short' }); // Short month name (e.g., Jan, Feb)
+            }
+            case 'YYYY': {
+              return newDate.getFullYear(); // Full year
+            }
+            default: {
+              const options = { year: 'numeric', month: 'long', day: 'numeric' };
+              return newDate.toLocaleDateString(undefined, options); // Default format
+            }
+          }
     }
   }
 };
@@ -216,11 +238,46 @@ export default {
   font-weight: 600;
 }
 
+
 .event-date {
   font-size: 12px;
   color: #ccc;
   position: absolute;
+  color:#f6a926 ;
+  
   bottom: 8px;
   right: 12px;
+}
+
+.arrow-icon {
+  font-size: 24px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.arrow-icon:hover {
+  transform: scale(1.2);
+}
+.event-date {
+  text-align: center;
+  background: linear-gradient(-45deg, #f7f5f5 0%, #07407b 100%);
+  border-radius: 50%;
+  width: 60%;
+
+}
+
+.event-date .day {
+  font-size: 2rem; /* Larger font for the day */
+  display: block;
+}
+
+.event-date .month {
+  font-size: 1.2rem; /* Smaller font for the month */
+  display: block;
+}
+
+.event-date .year {
+  font-size: 0.8rem; /* Smallest font for the year */
+  display: block;
 }
 </style>
