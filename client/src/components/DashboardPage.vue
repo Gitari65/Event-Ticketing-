@@ -20,7 +20,7 @@
         <h3>Trending Events</h3>
       </div>
       <div v-if="trendingEvents.length > 0" class="d-flex flex-row flex-nowrap overflow-hidden">
-        <div v-for="event in trendingEvents" :key="event.id" class="col-sm-5 col-md-2 col-lg-3 mb-4">
+        <div v-for="event in trendingEvents" :key="event.id" class="col-sm-6 col-md-4 col-lg-2 mb-4">
           <div class="card h-100" @click="viewEvent(event.id)">
             <div v-if="event.image">
               <img :src="event.image" class="card-img-top" alt="Event Image">
@@ -30,8 +30,11 @@
             </div>
             <div class="card-body">
               <h5 class="card-title">{{ event.title }}</h5>
-              <p class="card-text">{{ event.description }}</p>
-              <p class="event-date">{{ formatDate(event.date) }}</p>
+              <div class="event-date">
+                <span class="day">{{ formatDate(event.date, 'DD') }}</span>
+                <span class="month">{{ formatDate(event.date, 'MMM') }}</span>
+                <span class="year">{{ formatDate(event.date, 'YYYY') }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -54,7 +57,7 @@
         <h3>Recent Events</h3>
       </div>
       <div v-if="recentEvents.length > 0" class="d-flex flex-row flex-nowrap overflow-hidden">
-        <div v-for="event in recentEvents" :key="event.id" class="col-sm-5 col-md-2 col-lg-3 mb-4">
+        <div v-for="event in recentEvents" :key="event.id" class="col-sm-6 col-md-4 col-lg-2 mb-4">
           <div class="card h-100" @click="viewEvent(event.id)">
             <div v-if="event.image">
               <img :src="event.image" class="card-img-top" alt="Event Image">
@@ -65,7 +68,12 @@
             <div class="card-body">
               <h5 class="card-title">{{ event.title }}</h5>
               <p class="card-text">{{ event.description }}</p>
-              <p class="event-date">{{ formatDate(event.date) }}</p>
+              <div class="event-date">
+                <span class="day">{{ formatDate(event.date, 'DD') }}</span>
+                <span class="month">{{ formatDate(event.date, 'MMM') }}</span>
+                <span class="year">{{ formatDate(event.date, 'YYYY') }}</span>
+              </div>
+
             </div>
           </div>
         </div>
@@ -141,10 +149,27 @@ export default {
       });
     };
 
-    const formatDate = (date) => {
-      const options = { year: 'numeric', month: 'long', day: 'numeric' };
-      return new Date(date).toLocaleDateString(undefined, options);
+    const formatDate = (date, format) => {
+         const newDate = new Date(date);
+
+          switch (format) {
+            case 'DD': {
+              return newDate.getDate().toString().padStart(2, '0'); // Day of the month with leading zero
+            }
+            case 'MMM': {
+              return newDate.toLocaleString('default', { month: 'short' }); // Short month name (e.g., Jan, Feb)
+            }
+            case 'YYYY': {
+              return newDate.getFullYear(); // Full year
+            }
+            default: {
+              const options = { year: 'numeric', month: 'long', day: 'numeric' };
+              return newDate.toLocaleDateString(undefined, options); // Default format
+            }
+          }
     };
+
+
 
     const goToEvents = () => {
       this.$router.push('/events');
@@ -253,4 +278,29 @@ background-color: #000;
 .arrow-icon:hover {
   transform: scale(1.2);
 }
+.event-date {
+  text-align: center;
+  background: linear-gradient(-45deg, #f7f5f5 0%, #07407b 100%);
+  border-radius: 50%;
+  color:#f6a926 ;
+
+  width: 60%;
+
+}
+
+.event-date .day {
+  font-size: 2rem; /* Larger font for the day */
+  display: block;
+}
+
+.event-date .month {
+  font-size: 1.2rem; /* Smaller font for the month */
+  display: block;
+}
+
+.event-date .year {
+  font-size: 0.8rem; /* Smallest font for the year */
+  display: block;
+}
+
 </style>
