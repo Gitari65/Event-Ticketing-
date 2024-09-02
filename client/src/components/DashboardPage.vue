@@ -284,7 +284,7 @@ background-color: #000;
   border-radius: 50%;
   color:#f6a926 ;
 
-  width: 60%;
+  width: 50%;
 
 }
 
