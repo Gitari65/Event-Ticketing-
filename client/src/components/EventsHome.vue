@@ -244,7 +244,7 @@ export default {
   color: #ccc;
   position: absolute;
   color:#f6a926 ;
-  
+  font-weight: 700;
   bottom: 8px;
   right: 12px;
 }
