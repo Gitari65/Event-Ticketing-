@@ -15,6 +15,7 @@ const routes = [
     path: '/',
     component: AuthLayout,
     children: [
+      { path: '', name: 'home', component: EventsHome, meta: { requiresAuth: true } },
       { path: 'login', name: 'login', component: LoginPage },
       { path: 'register', name: 'register', component: RegisterPage },
     ],
