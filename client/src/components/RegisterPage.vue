@@ -27,7 +27,7 @@ export default {
   methods: {
     async handleRegister() {
       try {
-        const response = await axios.post('http://127.0.0.1:8000/register', {
+        const response = await axios.post('https://event-ticketing-1.onrender.com/register', {
           email: this.email,
           password: this.password,
           name: this.username
