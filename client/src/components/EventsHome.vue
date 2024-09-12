@@ -38,11 +38,7 @@
           </div>
           <div class="card-body">
             <h5 class="card-title">{{ event.name }}</h5>
-            <div class="event-date">
-                <span class="day">{{ formatDate(event.date, 'DD') }}</span>
-                <span class="month">{{ formatDate(event.date, 'MMM') }}</span>
-                <span class="year">{{ formatDate(event.date, 'YYYY') }}</span>
-              </div>
+            <DatePage :date="event.date"/>
             <!-- Show edit icon if user is creator -->
             <router-link v-if="isUserCreator(event)" :to="`/edit/event/${event.id}`" class="btn btn-sm btn-outline-primary">Edit</router-link>
           </div>
@@ -55,7 +51,7 @@
 <script>
 import axios from 'axios';
 import { mapState } from 'vuex';
-import { useRouter } from 'vue-router';
+import DatePage from '../assets/constants/DatePage.vue'
 
 export default {
   data() {
@@ -65,14 +61,8 @@ export default {
       filterType: 'all', // Default filter
       successMessage: 'Events fetched successfully!',
       errorMessage: 'Error fetching events. Please try again.',
-      loading: false
+      loading: false,
     };
-  },
-  setup(){
-    const router=useRouter();
-    return{
-      router,
-    }
   },
   computed: {
     ...mapState(['user']),
@@ -89,7 +79,6 @@ export default {
   },
   mounted() {
     this.getAllEvents();
-    
   },
   methods: {
     async getAllEvents() {
@@ -99,6 +88,7 @@ export default {
         this.events = eventResponse.data.recent.concat(eventResponse.data.trending);
         this.applyFilters(); // Apply initial filters
         console.log("Event data:", eventResponse.data);
+        this.loading = false; // Set loading to false after fetching events
       } catch (error) {
         this.loading = false;
         this.errorMessage = 'Error fetching events';
@@ -126,41 +116,25 @@ export default {
       this.filteredEvents = filteredEvents;
     },
     isUserCreator(event) {
-      return event.user_id === this.user.userId;
-    },  
-    goToTicketInfo(eventId){
-      this.router.push({name:'TicketInfo',params:{eventId}})
+      return event.user_id === this.user.userId; // Ensure userId exists in Vuex state
+    },
+    goToTicketInfo(eventId) {
+      this.$router.push({ name: 'TicketInfo', params: { eventId } });
     },
     async viewEvent(eventId) {
-      await axios.post('http://127.0.0.1:8000/views/update', {
-        event_id: eventId,
-        user_id: this.$store.state.user.id // Assuming user ID is stored in Vuex
-      })
-      .then(response => {
+      try {
+        const response = await axios.post('http://127.0.0.1:8000/views/update', {
+          event_id: eventId,
+          user_id: this.user.id // Using Vuex state for user ID
+        });
         console.log('View count updated successfully:', response.data);
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Error updating view count:', error);
-      });
-    },     formatDate (date, format) {
-         const newDate = new Date(date);
-
-          switch (format) {
-            case 'DD': {
-              return newDate.getDate().toString().padStart(2, '0'); // Day of the month with leading zero
-            }
-            case 'MMM': {
-              return newDate.toLocaleString('default', { month: 'short' }); // Short month name (e.g., Jan, Feb)
-            }
-            case 'YYYY': {
-              return newDate.getFullYear(); // Full year
-            }
-            default: {
-              const options = { year: 'numeric', month: 'long', day: 'numeric' };
-              return newDate.toLocaleDateString(undefined, options); // Default format
-            }
-          }
+      }
     }
+  },
+  components: {
+    DatePage
   }
 };
 </script>
@@ -258,26 +232,7 @@ export default {
 .arrow-icon:hover {
   transform: scale(1.2);
 }
-.event-date {
-  text-align: center;
-  background: linear-gradient(-45deg, #f7f5f5 0%, #07407b 100%);
-  border-radius: 50%;
-  width: 40%;
 
-}
 
-.event-date .day {
-  font-size: 2rem; /* Larger font for the day */
-  display: block;
-}
 
-.event-date .month {
-  font-size: 1.2rem; /* Smaller font for the month */
-  display: block;
-}
-
-.event-date .year {
-  font-size: 0.8rem; /* Smallest font for the year */
-  display: block;
-}
 </style>
