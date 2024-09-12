@@ -30,11 +30,9 @@
             </div>
             <div class="card-body">
               <h5 class="card-title">{{ event.title }}</h5>
-              <div class="event-date">
-                <span class="day">{{ formatDate(event.date, 'DD') }}</span>
-                <span class="month">{{ formatDate(event.date, 'MMM') }}</span>
-                <span class="year">{{ formatDate(event.date, 'YYYY') }}</span>
-              </div>
+              <DatePage :date="event.date"/>
+               
+             
             </div>
           </div>
         </div>
@@ -68,11 +66,8 @@
             <div class="card-body">
               <h5 class="card-title">{{ event.title }}</h5>
               <p class="card-text">{{ event.description }}</p>
-              <div class="event-date">
-                <span class="day">{{ formatDate(event.date, 'DD') }}</span>
-                <span class="month">{{ formatDate(event.date, 'MMM') }}</span>
-                <span class="year">{{ formatDate(event.date, 'YYYY') }}</span>
-              </div>
+              <DatePage :date="event.date"/>
+
 
             </div>
           </div>
@@ -101,11 +96,13 @@ import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 library.add(faArrowRight);
 import axios from 'axios';
 import { useStore } from 'vuex';
+import DatePage from '../assets/constants/DatePage.vue'
 
 export default {
   name: 'DashboardPage',
   components: {
     FontAwesomeIcon,
+    DatePage
   },
   setup() {
     const store = useStore();
@@ -278,29 +275,7 @@ background-color: #000;
 .arrow-icon:hover {
   transform: scale(1.2);
 }
-.event-date {
-  text-align: center;
-  background: linear-gradient(-45deg, #f7f5f5 0%, #07407b 100%);
-  border-radius: 50%;
-  color:#f6a926 ;
 
-  width: 50%;
 
-}
-
-.event-date .day {
-  font-size: 2rem; /* Larger font for the day */
-  display: block;
-}
-
-.event-date .month {
-  font-size: 1.2rem; /* Smaller font for the month */
-  display: block;
-}
-
-.event-date .year {
-  font-size: 0.8rem; /* Smallest font for the year */
-  display: block;
-}
 
 </style>
