@@ -260,7 +260,7 @@ background-color: #000;
 
 .event-date {
   font-size: 12px;
-  color: #ccc;
+
   position: absolute;
   bottom: 8px;
   right: 12px;
